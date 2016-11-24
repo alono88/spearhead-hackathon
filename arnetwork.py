@@ -58,11 +58,7 @@ class ARDroneNetworkProcess(multiprocessing.Process):
 
         stopping = False
         while not stopping:
-            print nav_socket
-            print video_socket
-            print self.com_pipe
             inputready, outputready, exceptready = select.select([nav_socket, video_socket], [], [])
-            #inputready, outputready, exceptready = select.select([nav_socket, video_socket, self.com_pipe], [], [])
             for i in inputready:
                 if i == video_socket:
                     while 1:
@@ -105,8 +101,6 @@ class IPCThread(threading.Thread):
 
     def run(self):
         while not self.stopping:
-            print self.nav_socket
-            print self.video_socket
             inputready, outputready, exceptready = select.select([self.drone.video_pipe, self.drone.nav_pipe], [], [], 1)
             for i in inputready:
                 if i == self.drone.video_pipe:
