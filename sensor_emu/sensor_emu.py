@@ -6,6 +6,7 @@ A remote server will listen to, and process the sent readings.
 '''
 
 import socket
+import time
 
 SERVER_PORT = 50000
 SERVER_IP = "10.26.108.202"
@@ -53,11 +54,53 @@ def sendreadings(left_dist, right_dist, is_hit, sock):
     data_str = gensensorpacket(left_dist, right_dist, is_hit)
     senddata(data_str, sock)
 
+# The following defines a list of simulated hits. 
+# Ordered by ascending row index, 
+# the list tells at which row, and at what index to simulate a hit. 
+HIT_LIST = [
+    (0, 0.7), 
+    (2, 0.3), 
+    (3, 0.5), 
+    (5, 0)
+    ]
+
+# How many rows will the drone go through before beating the player:
+ROW_COUNT = 5
+
+DISTANCE_THRESHOLD = 20
+
+def runsandbox():
+    # Emulates the sensor readings for a game.
+    sock = initsocket()
+    for i in xrange(ROW_COUNT):
+        for j in xrange(0.5 if i == 1 else 0, 1, 0.1):
+            if (i, j) in HIT_LIST:
+                is_hit = True
+            else:
+                is_hit = False
+            
+            sendreadings(
+                DISTANCE_THRESHOLD + 10, 
+                DISTANCE_THRESHOLD + 10, 
+                is_hit, 
+                sock)
+            
+            time.sleep(1)
+        
+        sendreadings(
+            DISTANCE_THRESHOLD / 2, 
+            DISTANCE_THRESHOLD / 2, 
+            False, 
+            sock)
+        
+        time.sleep(1)
 
 def main():
-    sock = initsocket()
     
-    sendreadings(1.2, 3.4, True, sock)
+    # sock = initsocket()
+    
+    # sendreadings(1.2, 3.4, True, sock)
+    runsandbox()
 
 if __name__ == '__main__':
     main()
